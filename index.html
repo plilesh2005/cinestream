@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>CineStream © DK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SETTINGS LOCK -->
+<div id="settings-lock">
+  <div class="slock-box">
+    <div class="slock-logo">CINESTREAM</div>
+    <div class="slock-icon">🔒</div>
+    <div class="slock-title">Settings Access</div>
+    <div class="slock-sub">Default password: <strong>cine1234</strong><br>Viewers can watch without logging in.</div>
+    <input type="password" class="slock-inp" id="slock-inp" placeholder="Enter password" autocomplete="current-password">
+    <div class="slock-err" id="slock-err"></div>
+    <button class="slock-btn" onclick="checkSettingsPwd()">Unlock Settings</button>
+    <button class="slock-cancel" onclick="closeSettingsLock()">Cancel</button>
+    <div class="slock-dk">© DK · CineStream™</div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-logo" id="nav-logo" onclick="showHome()">CINESTREAM</div>
+  <div class="nav-links">
+    <button class="nav-link active" data-view="home-view" onclick="showHome()">Home</button>
+    <button class="nav-link" onclick="showCatView('hollywood')">Hollywood</button>
+    <button class="nav-link" onclick="showCatView('bollywood')">Bollywood</button>
+    <button class="nav-link" onclick="showCatView('series')">Series</button>
+    <button class="nav-link" onclick="showCatView('other')">Other</button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-search">
+      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-input" placeholder="Search…" oninput="handleSearch(this.value)">
+    </div>
+    <button class="btn-nav-ghost" id="nav-drive-btn" onclick="openDriveModal()">☁ Drive</button>
+    <button class="btn-nav" onclick="openAddModal()">+ Add</button>
+    <button class="btn-nav-ghost" onclick="showSettings()">⚙</button>
+  </div>
+</nav>
+
+<!-- HOME VIEW -->
+<main>
+<div id="home-view" class="view active">
+  <section id="hero">
+    <div class="hero-bg"><img id="hero-bg-img" src="" alt=""></div>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
+      <div class="hero-tag" id="hero-tag">🎬 Featured</div>
+      <h1 class="hero-title" id="hero-title">CineStream</h1>
+      <div class="hero-meta">
+        <span class="hero-rating" id="hero-rating"></span>
+        <span id="hero-year"></span>
+      </div>
+      <p class="hero-desc" id="hero-desc">Your personal cinema. Built with ❤ by DK.</p>
+      <div class="hero-btns">
+        <button class="btn-hp" onclick="heroId&&directPlay(heroId)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Play
+        </button>
+        <button class="btn-hi" onclick="heroId&&openDetail(heroId)">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12.01" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>More Info
+        </button>
+      </div>
+    </div>
+  </section>
+  <div class="ticker-bar" id="ticker-bar"><div class="ticker-track" id="ticker-track"></div></div>
+  <div id="home-rows"></div>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div><div class="footer-logo" id="footer-site-name">CINESTREAM</div><div class="footer-tagline">Your personal streaming library</div></div>
+      <div style="text-align:right"><div class="footer-dk"><span>DK</span></div><div class="footer-copy">© <span class="footer-year"></span> DK. All rights reserved.<br>CineStream™ · Built by DK</div></div>
+    </div>
+  </footer>
+</div>
+
+<!-- CAT VIEW -->
+<div id="cat-view" class="view">
+  <div class="cv-head">
+    <button class="btn-back" onclick="showHome()">← Back</button>
+    <div class="cv-title" id="cv-title">Hollywood</div>
+    <button class="btn-nav" style="margin-left:auto" onclick="currentCatView==='series'?openSeriesCreateModal():openAddModal(currentCatView)">+ Add</button>
+  </div>
+  <div class="cv-grid" id="cv-grid"></div>
+  <div class="sv-grid2" id="cv-series-grid" style="display:none"></div>
+</div>
+
+<!-- SEARCH VIEW -->
+<div id="search-view" class="view">
+  <div class="sv-hd">Results for "<span id="sv-term"></span>"</div>
+  <div class="sv-grid" id="sv-grid"></div>
+</div>
+
+<!-- SETTINGS VIEW -->
+<div id="settings-view" class="view">
+  <div class="set-wrap">
+    <div class="set-top">
+      <div><div class="set-head-title">⚙ Settings</div><div class="set-head-sub">Manage CineStream — your personal cinema by DK</div></div>
+      <div style="text-align:right"><div class="dk-badge"><span>DK</span></div><div style="font-size:10px;color:var(--t3);margin-top:4px">© DK · CineStream™</div></div>
+    </div>
+    <div class="set-tabs">
+      <button class="set-tab active" data-tab="general" onclick="switchSetTab('general')">⚙ General</button>
+      <button class="set-tab" data-tab="library" onclick="switchSetTab('library');renderSettingsLibrary()">📚 Library</button>
+      <button class="set-tab" data-tab="sync" onclick="switchSetTab('sync')">🔄 Sync</button>
+      <button class="set-tab" data-tab="security" onclick="switchSetTab('security')">🔒 Security</button>
+      <button class="set-tab" data-tab="guides" onclick="switchSetTab('guides')">📖 Guides</button>
+    </div>
+
+    <!-- GENERAL -->
+    <div class="set-panel active" data-panel="general">
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('sc-drive')">
+          <div class="set-card-icon">☁</div>
+          <div class="set-card-text"><div class="set-card-label">Google Drive</div><div class="set-card-desc">API key and folder for streaming</div></div>
+          <div class="set-card-arrow" id="sc-drive-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="sc-drive-body">
+          <div class="sf"><div class="sf-lbl">API Key</div><input type="text" class="sf-inp" id="s-api-key" placeholder="AIzaSy…" autocomplete="off"></div>
+          <div class="sf"><div class="sf-lbl">Root Folder ID</div><input type="text" class="sf-inp" id="s-folder-id" placeholder="1Pydb…"><div class="sf-hint">From drive.google.com/drive/folders/<strong style="color:#ff8080">FOLDER_ID</strong></div></div>
+          <button class="btn-set" onclick="saveDriveSettings()">Save Drive Settings</button>
+        </div>
+      </div>
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('sc-site')">
+          <div class="set-card-icon">🎬</div>
+          <div class="set-card-text"><div class="set-card-label">Site Name</div><div class="set-card-desc">Name shown in the navbar</div></div>
+          <div class="set-card-arrow" id="sc-site-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="sc-site-body">
+          <div class="sf"><input type="text" class="sf-inp" id="s-site-name" placeholder="CineStream"></div>
+          <button class="btn-set" onclick="saveSiteSettings()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="set-panel" data-panel="library">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+        <button class="btn-set" onclick="openAddModal('')">+ Add Movie</button>
+        <button class="btn-set" style="background:rgba(16,185,129,.2);color:#34d399" onclick="openSeriesCreateModal()">📺 New Series</button>
+        <button class="btn-set-g" onclick="openDriveModal()">☁ Drive Import</button>
+        <button class="btn-set-g" onclick="exportData()">⬇ Export</button>
+        <button class="btn-set-g" onclick="$('import-file').click()">⬆ Import</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+      <div class="lib-scroll" id="s-lib-list"></div>
+    </div>
+
+    <!-- SYNC -->
+    <div class="set-panel" data-panel="sync">
+
+      <!-- GOOGLE DRIVE — PRIMARY -->
+      <div style="background:linear-gradient(135deg,rgba(66,133,244,.12),rgba(52,168,83,.08));border:1px solid rgba(66,133,244,.3);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:22px">🔵</span>
+          <div>
+            <div style="font-size:13px;font-weight:800">Google Drive Sync <span style="background:#1a73e8;padding:2px 7px;border-radius:3px;font-size:10px;margin-left:4px">RECOMMENDED</span></div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">Your Drive space — sign in once, sync everywhere</div>
+          </div>
+        </div>
+        <div class="set-msg" id="drive-auth-status" style="font-size:12px">Not signed in</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="btn-google-signin" class="btn-set" onclick="googleSignIn()" style="background:#1a73e8;display:flex;align-items:center;gap:8px;flex:1;justify-content:center">
+            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Sign in with Google
+          </button>
+          <button id="btn-google-signout" class="btn-set-g" onclick="googleSignOut()" style="display:none">Sign Out</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="drive-sync-btns" style="display:none">
+          <button class="btn-set" id="sync-now-btn" onclick="syncNow()" style="flex:1;text-align:center;padding:10px">🔄 Sync Now<br><span style="font-size:10px;font-weight:400;opacity:.8">Pull from Drive</span></button>
+          <button class="btn-set-g" onclick="forcePush()" style="flex:1;text-align:center;padding:10px;background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.25)">⬆ Push All<br><span style="font-size:10px;font-weight:400;opacity:.8">Upload to Drive</span></button>
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div style="background:var(--d3);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;color:var(--t2);line-height:1.8">
+        <div style="font-weight:700;color:var(--t1);margin-bottom:6px">📱 How to sync across devices</div>
+        <div>1. Click <strong style="color:#4ade80">Sign in with Google</strong> above on <strong>this device</strong></div>
+        <div>2. Add movies → they auto-save to your Drive</div>
+        <div>3. Open site on <strong>another device</strong> → Sign in → click <strong>🔄 Sync Now</strong></div>
+        <div style="margin-top:6px;padding:8px;background:rgba(66,133,244,.08);border-radius:6px;color:var(--t3)">Your data is saved as <strong>cinestream-db.json</strong> in your Google Drive. Only you can see it.</div>
+      </div>
+
+      <!-- GIST FALLBACK -->
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('sc-gist')">
+          <div class="set-card-icon">🐙</div>
+          <div class="set-card-text"><div class="set-card-label">GitHub Gist <span style="background:#333;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:4px">FALLBACK</span></div><div class="set-card-desc">Works without Google sign-in</div></div>
+          <div class="set-card-arrow" id="sc-gist-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="sc-gist-body">
+          <div class="sf">
+            <div class="sf-lbl">GitHub Token (ghp_…)</div>
+            <input type="password" class="sf-inp" id="s-gist-token" placeholder="ghp_…" autocomplete="off">
+          </div>
+          <div class="sf">
+            <div class="sf-lbl">Gist ID</div>
+            <input type="text" class="sf-inp" id="s-gist-id" placeholder="07bb296ad3b5db773f0352db3d75d5c5">
+          </div>
+          <button class="btn-set" id="s-gist-save-btn" onclick="saveGistSync()">Save &amp; Test</button>
+          <div class="set-msg" id="gist-msg" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- SHEETS BACKUP -->
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('sc-sheets')">
+          <div class="set-card-icon">📊</div>
+          <div class="set-card-text"><div class="set-card-label">Google Sheets <span style="background:#555;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:4px">WRITE BACKUP</span></div><div class="set-card-desc">Auto backup on every save</div></div>
+          <div class="set-card-arrow" id="sc-sheets-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="sc-sheets-body">
+          <div class="sf">
+            <div class="sf-lbl">Apps Script URL</div>
+            <input type="text" class="sf-inp" id="s-sheet-url" placeholder="https://script.google.com/macros/s/…/exec">
+          </div>
+          <button class="btn-set" id="s-sheet-save-btn" onclick="saveSheetSync()">Save URL</button>
+          <div class="set-msg" id="sheet-msg" style="display:none"></div>
+        </div>
+      </div>
+
+    </div>
+    
+        <!-- SECURITY -->
+    <div class="set-panel" data-panel="security">
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('sc-spwd')">
+          <div class="set-card-icon">🔒</div>
+          <div class="set-card-text"><div class="set-card-label">Settings Password</div><div class="set-card-desc">Default: cine1234</div></div>
+          <div class="set-card-arrow" id="sc-spwd-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="sc-spwd-body">
+          <div class="sf"><div class="sf-lbl">Current Password</div><input type="password" class="sf-inp" id="s-spwd-cur" placeholder="Current password"></div>
+          <div class="sf"><div class="sf-lbl">New Password</div><input type="password" class="sf-inp" id="s-spwd-new" placeholder="Min 4 characters"></div>
+          <div class="sf"><div class="sf-lbl">Confirm New</div><input type="password" class="sf-inp" id="s-spwd-cf" placeholder="Confirm"></div>
+          <div class="slock-err" id="s-spwd-err" style="text-align:left;margin-bottom:4px"></div>
+          <button class="btn-set" onclick="changeSettingsPwd()">Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GUIDES -->
+    <div class="set-panel" data-panel="guides">
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('g-sheets')">
+          <div class="set-card-icon">📊</div>
+          <div class="set-card-text"><div class="set-card-label">Setup Google Sheets Sync</div><div class="set-card-desc">Apps Script code to paste</div></div>
+          <div class="set-card-arrow" id="g-sheets-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="g-sheets-body">
+          <div class="guide-step"><div class="g-num">1</div><div class="g-txt">Go to <a href="https://script.google.com" target="_blank" style="color:#ff8080">script.google.com</a> → New project → delete all code → paste below</div></div>
+          <div class="code-block">const SHEET_NAME='CineStreamDB';
+function doGet(e){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(SHEET_NAME)||ss.insertSheet(SHEET_NAME);
+  const d=sh.getRange(1,1).getValue();
+  return ContentService.createTextOutput(d||'{"movies":[],"cfg":{}}')
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doPost(e){
+  const ss=SpreadsheetApp.getActiveSpreadsheet();
+  let sh=ss.getSheetByName(SHEET_NAME)||ss.insertSheet(SHEET_NAME);
+  sh.getRange(1,1).setValue(e.postData.contents);
+  return ContentService.createTextOutput('{"ok":true}')
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+          <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Deploy → New deployment → Web app. Execute as: <strong>Me</strong>. Who has access: <strong>Anyone</strong>. Click Deploy → Authorize.</div></div>
+          <div class="guide-step"><div class="g-num">3</div><div class="g-txt">Copy the Web app URL → paste in Settings → Sync → Google Sheets → Save &amp; Test.</div></div>
+        </div>
+      </div>
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('g-gist')">
+          <div class="set-card-icon">🐙</div>
+          <div class="set-card-text"><div class="set-card-label">How to use GitHub Gist Sync</div><div class="set-card-desc">Add movies on phone → see on laptop</div></div>
+          <div class="set-card-arrow" id="g-gist-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="g-gist-body">
+          <div class="guide-step"><div class="g-num">1</div><div class="g-txt">Go to <a href="https://github.com/settings/tokens" target="_blank" style="color:#ff8080">github.com/settings/tokens</a> → Tokens (classic) → Generate new → Name: CineStream, Expiration: No expiration, check only: <strong>gist</strong> → Generate → Copy token.</div></div>
+          <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Settings → Sync → GitHub Gist → paste token. Gist ID is pre-filled. Click <strong>Save &amp; Test</strong>.</div></div>
+          <div class="guide-step"><div class="g-num">3</div><div class="g-txt">On same device: click <strong>⬆ Push All</strong> to save library to cloud. On any other device: paste same token → click <strong>🔄 Sync Now</strong>.</div></div>
+        </div>
+      </div>
+      <div class="set-card">
+        <div class="set-card-head" onclick="toggleCard('g-series')">
+          <div class="set-card-icon">📺</div>
+          <div class="set-card-text"><div class="set-card-label">How to Add Series</div><div class="set-card-desc">Money Heist, Breaking Bad, etc.</div></div>
+          <div class="set-card-arrow" id="g-series-arrow">›</div>
+        </div>
+        <div class="set-card-body" id="g-series-body">
+          <div class="guide-step"><div class="g-num">1</div><div class="g-txt">Click <strong>+ Add</strong> button (navbar or mobile +) → select <strong>📺 Series Folder</strong>.</div></div>
+          <div class="guide-step"><div class="g-num">2</div><div class="g-txt">Enter series name, upload poster, add description → click <strong>Create Series</strong>.</div></div>
+          <div class="guide-step"><div class="g-num">3</div><div class="g-txt">Inside the series: click <strong>☁ Add Episodes from Drive</strong> → scan your Drive folder → select episodes → Add Episodes.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:20px 0 8px;border-top:1px solid rgba(255,255,255,.07);margin-top:8px">
+      <div class="footer-dk" style="margin:0 auto 6px"><span>DK</span></div>
+      <div style="font-size:11px;color:var(--t3)">CineStream™ © <span class="footer-year"></span> DK. All rights reserved.</div>
+    </div>
+  </div>
+</div>
+</main>
+
+<!-- DETAIL MODAL -->
+<div class="modal-bg" id="detail-modal">
+  <div class="modal-box" style="max-width:640px;max-height:90vh;">
+    <div class="mh"><div><div class="mh-title">Movie Info</div></div><button class="mh-close" onclick="closeDetail()">✕</button></div>
+    <div class="detail-scroll">
+      <div class="d-banner">
+        <img class="d-banner-bg" id="d-banner-bg" src="" alt="" style="display:none">
+        <div class="d-banner-grad"></div>
+        <div class="d-thumb" id="d-thumb-wrap"><img id="d-thumb-img" src="" alt="" style="display:none"></div>
+        <button class="d-close" onclick="closeDetail()">✕</button>
+      </div>
+      <div class="d-body">
+        <div class="d-title" id="d-title"></div>
+        <div class="d-meta" id="d-meta"></div>
+        <div class="d-desc" id="d-desc"></div>
+        <div class="d-actions">
+          <button class="btn-dp" id="btn-dp" onclick="playFromDetail()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Play</button>
+          <button class="btn-di" id="btn-dep" style="display:none" onclick="epsFromDetail()">📺 Episodes</button>
+          <button class="btn-di" onclick="editFromDetail()">✏ Edit</button>
+        </div>
+        <div class="rv-sec">
+          <div class="rv-title">⭐ Reviews</div>
+          <div class="rv-list" id="rv-list"></div>
+          <div class="rv-form">
+            <div class="rv-form-lbl">Add your review</div>
+            <div class="star-row">
+              <button class="star-btn" onclick="setStarUI(1)">★</button>
+              <button class="star-btn" onclick="setStarUI(2)">★</button>
+              <button class="star-btn" onclick="setStarUI(3)">★</button>
+              <button class="star-btn" onclick="setStarUI(4)">★</button>
+              <button class="star-btn" onclick="setStarUI(5)">★</button>
+            </div>
+            <textarea class="rv-ta" id="rv-ta-inp" placeholder="Write your thoughts…" rows="2"></textarea>
+            <button class="rv-submit" onclick="submitReview()">Post Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER MODAL -->
+<div class="modal-bg" id="player-modal" style="z-index:1200">
+  <div class="modal-box" style="max-width:980px">
+    <div class="mh">
+      <div><div class="mh-title" id="pm-title">Now Playing</div><div class="mh-sub" id="pm-meta"></div></div>
+      <button class="mh-close" onclick="closePlayer()">✕</button>
+    </div>
+    <video id="main-video" controls autoplay playsinline controlsList="nodownload"></video>
+    <div id="player-iframe-wrap" style="display:none;width:100%;background:#000">
+      <iframe id="player-iframe" src="" allow="autoplay;fullscreen" allowfullscreen style="width:100%;height:420px;border:none;display:block"></iframe>
+    </div>
+    <div class="player-foot">
+      <span class="pcpill" id="pm-pill"></span>
+      <a class="p-drive-link" id="player-drive-link" href="#" target="_blank">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Open in Drive
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- EPISODES MODAL -->
+<div class="modal-bg" id="ep-modal" style="z-index:1150">
+  <div class="modal-box" style="max-width:640px;max-height:88vh;">
+    <div class="mh"><div><div class="mh-title" id="ep-title">Episodes</div></div><button class="mh-close" onclick="closeEpModal()">✕</button></div>
+    <div class="ep-list" id="ep-list"></div>
+  </div>
+</div>
+
+<!-- ADD CHOICE MODAL -->
+<div class="modal-bg" id="add-choice-modal">
+  <div class="modal-box" style="max-width:340px">
+    <div class="mh"><div><div class="mh-title">What to add?</div></div><button class="mh-close" onclick="closeModal('add-choice-modal')">✕</button></div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+      <button onclick="closeModal('add-choice-modal');openEditModal(null,_addPreset||'')" style="background:var(--d3);border:1px solid var(--border);color:var(--t1);padding:16px;border-radius:10px;text-align:left;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;transition:.15s" onmouseover="this.style.background='var(--d4)'" onmouseout="this.style.background='var(--d3)'">
+        <span style="font-size:28px">🎬</span><div><div>Movie / Video</div><div style="font-size:11px;color:var(--t3);font-weight:400;margin-top:2px">Hollywood, Bollywood, or other</div></div>
+      </button>
+      <button onclick="closeModal('add-choice-modal');openSeriesCreateModal()" style="background:var(--d3);border:1px solid var(--border);color:var(--t1);padding:16px;border-radius:10px;text-align:left;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;transition:.15s" onmouseover="this.style.background='var(--d4)'" onmouseout="this.style.background='var(--d3)'">
+        <span style="font-size:28px">📺</span><div><div>Series Folder</div><div style="font-size:11px;color:var(--t3);font-weight:400;margin-top:2px">TV shows, web series with episodes</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MOVIE MODAL -->
+<div class="modal-bg" id="edit-modal">
+  <div class="modal-box" style="max-width:520px;max-height:92vh;">
+    <div class="mh"><div><div class="mh-title" id="em-head-title">Add New Movie</div></div><button class="mh-close" onclick="closeEditModal()">✕</button></div>
+    <div class="em-body">
+      <div class="fg">
+        <label>Poster Image</label>
+        <div class="poster-row">
+          <div class="poster-box" onclick="$('ef-pfile').click()">
+            <img id="ef-poster-img" src="" alt="" style="display:none">
+            <span class="pb-ph" id="ef-poster-ph">🖼</span>
+          </div>
+          <div class="poster-side">
+            <button class="btn-upl" onclick="$('ef-pfile').click()">📁 Upload from device</button>
+            <input type="file" id="ef-pfile" accept="image/*" style="display:none" onchange="handlePosterFile(event)">
+            <input type="url" class="fi" id="ef-poster-url" placeholder="…or paste image URL" oninput="handlePosterUrl()">
+          </div>
+        </div>
+      </div>
+      <div class="fg"><label for="ef-title">Title *</label><input type="text" class="fi" id="ef-title" placeholder="Movie name"></div>
+      <div class="fg">
+        <label for="ef-cat">Category *</label>
+        <select class="fs" id="ef-cat">
+          <option value="">Select category…</option>
+          <option value="hollywood">🎬 Hollywood</option>
+          <option value="bollywood">🎭 Bollywood</option>
+          <option value="other">📁 Other</option>
+        </select>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label for="ef-year">Year</label><input type="number" class="fi" id="ef-year" placeholder="2024" min="1900" max="2099"></div>
+        <div class="fg"><label for="ef-rating">Rating (0–10)</label><input type="number" class="fi" id="ef-rating" placeholder="8.5" min="0" max="10" step="0.1"></div>
+      </div>
+      <div class="fg"><label for="ef-desc">Description</label><textarea class="fta" id="ef-desc" placeholder="Short description…"></textarea></div>
+      <div class="fg">
+        <label for="ef-src">Video Source</label>
+        <select class="fs" id="ef-src" onchange="onSrcChange()">
+          <option value="drive">Google Drive File ID</option>
+          <option value="url">Direct Video URL</option>
+          <option value="local">Local File (this device only)</option>
+        </select>
+      </div>
+      <div class="src-panel on" data-src="drive">
+        <input type="text" class="fi" id="ef-drive-id" placeholder="File ID from drive.google.com/file/d/FILE_ID/view">
+      </div>
+      <div class="src-panel" data-src="url">
+        <input type="url" class="fi" id="ef-video-url" placeholder="https://…/video.mp4">
+      </div>
+      <div class="src-panel" data-src="local">
+        <button class="btn-upl" id="ef-vfile-lbl" onclick="$('ef-vfile').click()">📁 Choose Video File</button>
+        <input type="file" id="ef-vfile" accept="video/*" style="display:none" onchange="handleVidFile(event)">
+        <div class="fg-hint" style="color:#e87c03">⚠ Local files only play on this device.</div>
+      </div>
+    </div>
+    <div class="em-foot">
+      <button class="btn-emc" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-ems" id="btn-em-save" onclick="saveTitle()">Save Movie</button>
+    </div>
+  </div>
+</div>
+
+<!-- SERIES CREATE/EDIT MODAL -->
+<div class="modal-bg" id="series-create-modal">
+  <div class="modal-box" style="max-width:560px;max-height:92vh;">
+    <div class="mh">
+      <div><div class="mh-title" id="sc-modal-title">Create Series Folder</div></div>
+      <button class="mh-close" onclick="closeSeriesCreateModal()">✕</button>
+    </div>
+    <div class="em-body">
+      <div class="fg">
+        <label>Series Poster</label>
+        <div class="poster-row">
+          <div class="poster-box" onclick="$('sc-poster-file').click()">
+            <img id="sc-poster-img" src="" alt="" style="display:none">
+            <span class="pb-ph" id="sc-poster-ph">📺</span>
+          </div>
+          <div class="poster-side">
+            <button class="btn-upl" onclick="$('sc-poster-file').click()">📁 Upload Poster</button>
+            <input type="file" id="sc-poster-file" accept="image/*" style="display:none" onchange="handleSeriesPosterFile(event)">
+            <input type="url" class="fi" id="sc-poster-url" placeholder="…or paste image URL" oninput="handleSeriesPosterUrl()">
+            <div class="fg-hint">Portrait 2:3 ratio works best. Shows on home page.</div>
+          </div>
+        </div>
+      </div>
+      <div class="fg"><label for="sc-title-inp">Series Name *</label><input type="text" class="fi" id="sc-title-inp" placeholder="e.g. Money Heist, Breaking Bad"></div>
+      <div class="fg"><label for="sc-desc-inp">Description</label><textarea class="fta" id="sc-desc-inp" placeholder="Short description…" style="min-height:60px"></textarea></div>
+      <button class="btn-ems" id="sc-save-btn" onclick="saveSeries()" style="align-self:flex-start">Create Series</button>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px">Episodes</div>
+          <button class="btn-set-g" style="padding:6px 12px;font-size:12px" onclick="openEpDriveModal()">☁ Add Episodes from Drive</button>
+        </div>
+        <div id="sc-ep-list" style="display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto"></div>
+      </div>
+    </div>
+    <div class="em-foot">
+      <button class="btn-emc" onclick="closeSeriesCreateModal()">Done</button>
+      <button class="btn-ems" onclick="saveSeries()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- EPISODE DRIVE IMPORT -->
+<div class="modal-bg" id="ep-drive-modal" style="z-index:1300">
+  <div class="modal-box" style="max-width:560px;max-height:90vh;">
+    <div class="mh"><div><div class="mh-title">☁ Add Episodes from Drive</div></div><button class="mh-close" onclick="closeEpDriveModal()">✕</button></div>
+    <div class="dm-body">
+      <div class="guide-tip" style="font-size:12px">Enter the Drive folder ID containing this series' episodes.</div>
+      <div class="fg"><label>API Key</label><input type="text" class="fi" id="epdr-api" placeholder="AIza…" autocomplete="off"></div>
+      <div class="fg">
+        <label>Folder ID (leave blank for root)</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" class="fi" id="epdr-folder" placeholder="Folder ID or blank for root" style="flex:1">
+          <button class="btn-set" onclick="loadEpDriveFolder()">Scan</button>
+        </div>
+      </div>
+      <div id="epdr-loading" class="dots" style="display:none"><span></span><span></span><span></span></div>
+      <div class="scan-st" id="epdr-status"></div>
+      <div class="fchips" id="epdr-chips"></div>
+      <div id="epdr-file-wrap" style="display:none">
+        <div class="fg"><label>Episodes found</label><div class="drive-file-list" id="epdr-items"></div></div>
+      </div>
+    </div>
+    <div class="dm-foot">
+      <div class="dm-foot-row">
+        <button class="btn-set-g" onclick="selAllEpDrive()">☑ All</button>
+        <button class="btn-set" onclick="importEpisodesSelected()">Add Episodes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DRIVE IMPORT MODAL -->
+<div class="modal-bg" id="drive-modal">
+  <div class="modal-box" style="max-width:580px;max-height:92vh;">
+    <div class="mh"><div><div class="mh-title">☁ Import Movies from Drive</div></div><button class="mh-close" onclick="closeDriveModal()">✕</button></div>
+    <div class="dm-body">
+      <div class="guide-tip" style="font-size:12px">Pre-configured. Click <strong>Scan Drive</strong> to find all videos. Select files, fill details, then Import.</div>
+      <div class="fg"><label>API Key</label><input type="text" class="fi" id="dr-api" placeholder="AIza…" autocomplete="off"></div>
+      <div class="fg">
+        <label>Folder ID</label>
+        <div style="display:flex;gap:8px">
+          <input type="text" class="fi" id="dr-folder" placeholder="1PydbnXY…" style="flex:1">
+          <button class="btn-set" onclick="loadDriveRoot()">Scan Drive</button>
+        </div>
+      </div>
+      <div id="dr-loading" class="dots" style="display:none"><span></span><span></span><span></span></div>
+      <div class="scan-st" id="dr-status"></div>
+      <div class="fchips" id="dr-chips"></div>
+      <div id="dr-file-wrap" style="display:none">
+        <div class="fg">
+          <label>Files found — check to select, then fill details</label>
+          <div class="drive-file-list" id="dr-items"></div>
+        </div>
+      </div>
+      <div id="dr-detail-sec" style="display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Fill details for selected files</div>
+        <div id="dr-detail-forms" style="display:flex;flex-direction:column;gap:10px"></div>
+      </div>
+    </div>
+    <div class="dm-foot">
+      <div class="dm-foot-row">
+        <button class="btn-set-g" onclick="selAllDrive()">☑ Select All</button>
+        <button class="btn-set" id="dr-import-btn" onclick="importSelected()">Import Selected</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav">
+  <div class="mob-nav-inner">
+    <button class="mob-btn active" id="mob-home" onclick="showHome();setMobActive('mob-home')">
+      <span class="mob-icon">🏠</span><span>Home</span>
+    </button>
+    <button class="mob-btn" id="mob-search" onclick="focusMobileSearch()">
+      <span class="mob-icon">🔍</span><span>Search</span>
+    </button>
+    <button class="mob-add" onclick="openAddModal('')">＋</button>
+    <button class="mob-btn" id="mob-drive" onclick="openDriveModal()">
+      <span class="mob-icon">☁</span><span>Drive</span>
+    </button>
+    <button class="mob-btn" id="mob-settings" onclick="showSettings();setMobActive('mob-settings')">
+      <span class="mob-icon">⚙</span><span>Settings</span>
+    </button>
+  </div>
+</div>
+
+<!-- MOBILE SEARCH BAR -->
+<div id="mob-search-bar" style="display:none;position:fixed;top:var(--nav-h);left:0;right:0;z-index:699;background:rgba(10,10,15,.97);padding:10px 14px;border-bottom:1px solid var(--border);backdrop-filter:blur(12px)">
+  <div style="display:flex;align-items:center;gap:8px;background:var(--d3);border:1px solid var(--border);border-radius:8px;padding:9px 14px">
+    <span>🔍</span>
+    <input type="text" id="mob-search-input" placeholder="Search movies, series…" style="background:none;border:none;color:var(--t1);font-size:14px;width:100%" oninput="handleSearch(this.value)">
+    <button onclick="closeMobileSearch()" style="background:none;border:none;color:var(--t3);font-size:18px">✕</button>
+  </div>
+</div>
+
+<script src="db.js"></script>
+<script src="app.js"></script>
+<script>document.querySelectorAll('.footer-year').forEach(e=>e.textContent=new Date().getFullYear());</script>
+</body>
+</html>
